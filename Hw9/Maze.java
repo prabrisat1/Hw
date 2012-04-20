@@ -87,7 +87,7 @@ public class Maze {
     	}
     }
     for(int x = 0; x< horizontalSize -1; x++){
-    	for(int y = 0; y < verticalSize - 1; y ++){
+    	for(int y = 0; y < verticalSize; y ++){
     		Wall newvwall = new Wall(x,y, 1);
     		wallArray[wallArrayTracker] = newvwall;
     		wallArrayTracker ++;
@@ -104,61 +104,66 @@ public class Maze {
     	wallArray[currTracker] = lastWall;
     	lastTracker --;
     }
-    
     //visits all the walls and does things
     for(int place = wallArray.length - 1; place >= 0; place --){
     	//determine which cell is on what side of the wall
     		//Hwall
-    	if(((Wall) wallArray[place]).getType() == 0){
-    		int hplace = ((Wall)wallArray[place]).getHPosition();
-    		int vtop = ((Wall)wallArray[place]).getVPosition();
-    		int vbottom = ((Wall)wallArray[place]).getVPosition();
-    		int cellnumbertop = vtop*horizontalSize + hplace;
-    		int cellnumberbottom = vbottom*horizontalSize + hplace;
-    		int celltop = initialset.find(cellnumbertop);
-    		int cellbottom = initialset.find(cellnumberbottom);
-    		if(!(celltop == cellbottom || celltop == -1 && cellbottom == cellnumbertop || cellbottom == -1 && cellbottom == cellnumberbottom)){
-    			this.hWalls[hplace][vtop] = false;
-    			int root1;
-    			if(celltop == -1){
+    	System.out.println(place);
+    	if((Wall)wallArray[place] != null){
+    		if(((Wall) wallArray[place]).getType() == 0){
+    			int hplace = ((Wall)wallArray[place]).getHPosition();
+    			int vtop = ((Wall)wallArray[place]).getVPosition();
+    			int vbottom = ((Wall)wallArray[place]).getVPosition() + 1;
+    			int cellnumbertop = vtop*horizontalSize + hplace;
+    			int cellnumberbottom = vbottom*horizontalSize + hplace;
+    			System.out.println("ct =" + cellnumbertop + " and cb =" + cellnumberbottom);
+    			int celltop = initialset.find(cellnumbertop);
+    			System.out.println(celltop);
+    			int cellbottom = initialset.find(cellnumberbottom);
+    			System.out.println(cellbottom);
+    			if(!(celltop == cellbottom || celltop == cellnumbertop && cellbottom == cellnumbertop || cellbottom == cellnumberbottom && cellbottom == cellnumberbottom)){
+    				System.out.println("got here");
+    				this.hWalls[hplace][vtop] = false;
+    				int root1;
+    				if(celltop == cellnumbertop){
     				root1 = cellnumbertop;
-    			}else{
-    				root1 = celltop;
-    			}
-    			int root2;
-    			if(cellbottom == -1){
-    				root2 = cellnumberbottom;
-    			}else{
-    				root2 = cellbottom;
-    			}
-    			initialset.union(root1, root2);
-    		}		
-    	}else{
-			int vplace = ((Wall) wallArray[place]).getVPosition();
-			int hleft = ((Wall)wallArray[place]).getHPosition();
-			int hright = ((Wall)wallArray[place]).getHPosition() + 1;
-			int cellnumberleft = vplace*horizontalSize + hleft;
-			int cellnumberright = vplace*horizontalSize + hleft;
-			int cellleft = initialset.find(cellnumberleft);
-			int cellright = initialset.find(cellnumberright);
-			if(!(cellleft == cellright || cellleft == -1 && cellright == cellnumberleft || cellright == -1 && cellleft == cellnumberright)){
-				this.vWalls[hleft][vplace] = false;
-				int root1;
-				if(cellleft  == -1){
-					root1 = cellnumberleft;
-				}else{
-					root1 = cellleft;
+    				}else{
+    					root1 = celltop;
+    				}
+    				int root2;
+    				if(cellbottom == cellnumberbottom){
+    					root2 = cellnumberbottom;
+    				}else{
+    					root2 = cellbottom;
+    				}
+    				initialset.union(root1, root2);
+    			}		
+    		}else{
+    			int vplace = ((Wall) wallArray[place]).getVPosition();
+    			int hleft = ((Wall)wallArray[place]).getHPosition();
+    			int hright = ((Wall)wallArray[place]).getHPosition() + 1;
+    			int cellnumberleft = vplace*horizontalSize + hleft;
+    			int cellnumberright = vplace*horizontalSize + hright;
+    			int cellleft = initialset.find(cellnumberleft);
+    			int cellright = initialset.find(cellnumberright);
+    			if(!(cellleft == cellright || cellleft == cellnumberleft && cellright == cellnumberleft || cellright == cellnumberright && cellleft == cellnumberright)){
+    				this.vWalls[hleft][vplace] = false;
+    				int root1;
+    				if(cellleft  == cellnumberleft){
+    					root1 = cellnumberleft;
+    				}else{
+    					root1 = cellleft;
+    				}
+    				int root2;
+    				if(cellright == cellnumberright){
+    					root2 = cellnumberright;
+    				}else{
+    					root2 = cellright;
+    				}
+    				initialset.union(root1, root2);	
+					}
 				}
-				int root2;
-				if(cellright == -1){
-					root2 = cellnumberright;
-				}else{
-					root2 = cellright;
-				}
-				initialset.union(root1, root2);
-				
-				}
-			}
+    		}
 		}
     }
 
@@ -171,38 +176,39 @@ public class Maze {
 
     // Print the top exterior wall.
     for (i = 0; i < horiz; i++) {
-      s = s + "**";
+      //s = s + "**";
+      s = s + "--";
     }
-    s = s + "*\n*";
+    s = s + "-\n|";
 
     // Print the maze interior.
     for (j = 0; j < vert; j++) {
       // Print a row of cells and vertical walls.
       for (i = 0; i < horiz - 1; i++) {
         if (vWalls[i][j]) {
-          s = s + " *";
+          s = s + " |";
         } else {
           s = s + "  ";
         }
       }
-      s = s + " *\n*";
+      s = s + " |\n-";
       if (j < vert - 1) {
         // Print a row of horizontal walls and wall corners.
         for (i = 0; i < horiz; i++) {
           if (hWalls[i][j]) {
-            s = s + "**";
+            s = s + "--";
           } else {
-            s = s + " *";
+            s = s + " |";
           }
         }
-        s = s + "\n*";
+        s = s + "\n|";
       }
     }
 
     // Print the bottom exterior wall.  (Note that the first asterisk has
     // already been printed.)
     for (i = 0; i < horiz; i++) {
-      s = s + "**";
+      s = s + "--";
     }
     return s + "\n";
   }
