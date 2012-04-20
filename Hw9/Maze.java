@@ -64,9 +64,6 @@ public class Maze {
         }
       }
     }
-
-
-
     /**
      * Fill in the rest of this method.  You should go through all the walls of
      * the maze in random order, and remove any wall whose removal will not
@@ -77,10 +74,93 @@ public class Maze {
      * integer.  randInt() generates different numbers every time the program
      * is run, so that you can make lots of different mazes.
      **/
-
-
-
-  }
+    DisjointSets initialset = new DisjointSets(horizontalSize*verticalSize);
+    Object[] wallArray = new Object[horizontalSize*(verticalSize-1)+(horizontalSize-1)*verticalSize];
+    int wallArrayTracker = 0;
+    
+    //adds the walls into an array
+    for(int x = 0; x < horizontalSize; x ++){
+    	for(int y = 0; y < verticalSize - 1; y++){
+    		Wall newhwall = new Wall(x, y, 0);
+    		wallArray[wallArrayTracker] = newhwall;
+    		wallArrayTracker ++;
+    	}
+    }
+    for(int x = 0; x< horizontalSize -1; x++){
+    	for(int y = 0; y < verticalSize - 1; y ++){
+    		Wall newvwall = new Wall(x,y, 1);
+    		wallArray[wallArrayTracker] = newvwall;
+    		wallArrayTracker ++;
+    	}
+    }
+    
+    //reorders the walls within the array
+    int lastTracker = wallArray.length -1;
+    while(lastTracker > 0){
+    	Object lastWall = wallArray[lastTracker];
+    	int currTracker = randInt(lastTracker);
+    	Object currWall = wallArray[currTracker];
+    	wallArray[lastTracker] = currWall;
+    	wallArray[currTracker] = lastWall;
+    	lastTracker --;
+    }
+    
+    //visits all the walls and does things
+    for(int place = wallArray.length - 1; place >= 0; place --){
+    	//determine which cell is on what side of the wall
+    		//Hwall
+    	if(((Wall) wallArray[place]).getType() == 0){
+    		int hplace = ((Wall)wallArray[place]).getHPosition();
+    		int vtop = ((Wall)wallArray[place]).getVPosition();
+    		int vbottom = ((Wall)wallArray[place]).getVPosition();
+    		int cellnumbertop = vtop*horizontalSize + hplace;
+    		int cellnumberbottom = vbottom*horizontalSize + hplace;
+    		int celltop = initialset.find(cellnumbertop);
+    		int cellbottom = initialset.find(cellnumberbottom);
+    		if(!(celltop == cellbottom || celltop == -1 && cellbottom == cellnumbertop || cellbottom == -1 && cellbottom == cellnumberbottom)){
+    			this.hWalls[hplace][vtop] = false;
+    			int root1;
+    			if(celltop == -1){
+    				root1 = cellnumbertop;
+    			}else{
+    				root1 = celltop;
+    			}
+    			int root2;
+    			if(cellbottom == -1){
+    				root2 = cellnumberbottom;
+    			}else{
+    				root2 = cellbottom;
+    			}
+    			initialset.union(root1, root2);
+    		}		
+    	}else{
+			int vplace = ((Wall) wallArray[place]).getVPosition();
+			int hleft = ((Wall)wallArray[place]).getHPosition();
+			int hright = ((Wall)wallArray[place]).getHPosition() + 1;
+			int cellnumberleft = vplace*horizontalSize + hleft;
+			int cellnumberright = vplace*horizontalSize + hleft;
+			int cellleft = initialset.find(cellnumberleft);
+			int cellright = initialset.find(cellnumberright);
+			if(!(cellleft == cellright || cellleft == -1 && cellright == cellnumberleft || cellright == -1 && cellleft == cellnumberright)){
+				this.vWalls[hleft][vplace] = false;
+				int root1;
+				if(cellleft  == -1){
+					root1 = cellnumberleft;
+				}else{
+					root1 = cellleft;
+				}
+				int root2;
+				if(cellright == -1){
+					root2 = cellnumberright;
+				}else{
+					root2 = cellright;
+				}
+				initialset.union(root1, root2);
+				
+				}
+			}
+		}
+    }
 
   /**
    *  toString() returns a string representation of the maze.
